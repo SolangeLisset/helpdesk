@@ -2,6 +2,8 @@
 
 Sistema web de mesa de ayuda creado con React y Vite. Permite gestionar tickets de soporte con una interfaz ordenada tipo empresarial.
 
+![Captura de Mesa de Ayuda](public/screenshot.png)
+
 ## Autora
 
 SolangeLisset

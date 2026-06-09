@@ -10,6 +10,7 @@ SolangeLisset
 
 - Dashboard con metricas de tickets.
 - Pantalla de login protegida.
+- Persistencia en localStorage para conservar tickets al recargar.
 - Creacion de tickets.
 - Prioridad: Alta, Media y Baja.
 - Estado: Abierto, En progreso, Pendiente y Resuelto.
@@ -18,6 +19,9 @@ SolangeLisset
 - Adjuntos simulados.
 - Filtros por busqueda, prioridad, estado y tecnico.
 - Vista Kanban para revisar y mover tickets por estado.
+- Drag and drop en Kanban para cambiar estados.
+- SLA visual por prioridad.
+- Historial de cambios para estado, prioridad y tecnico.
 - Roles simulados: Administrador, Tecnico y Usuario.
 - JWT simulado para representar sesion activa.
 

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   AlertCircle,
@@ -28,6 +28,12 @@ import './styles.css';
 const priorities = ['Alta', 'Media', 'Baja'];
 const statuses = ['Abierto', 'En progreso', 'Pendiente', 'Resuelto'];
 const categories = ['Hardware', 'Software', 'Red', 'Accesos', 'Seguridad', 'General'];
+const STORAGE_KEY = 'helpdesk.tickets.v1';
+const slaHoursByPriority = {
+  Alta: 4,
+  Media: 24,
+  Baja: 72
+};
 
 function App() {
   const [session, setSession] = useState(null);
@@ -40,7 +46,7 @@ function App() {
 }
 
 function HelpDeskApp({ session, setSession }) {
-  const [tickets, setTickets] = useState(seedTickets);
+  const [tickets, setTickets] = useState(loadStoredTickets);
   const [selectedId, setSelectedId] = useState(seedTickets[0].id);
   const [activeView, setActiveView] = useState('dashboard');
   const [filters, setFilters] = useState({
@@ -55,6 +61,10 @@ function HelpDeskApp({ session, setSession }) {
   const isAdmin = currentUser.role === 'Administrador';
   const isTech = currentUser.role === 'Tecnico';
   const canManage = isAdmin || isTech;
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets));
+  }, [tickets]);
 
   const visibleTickets = useMemo(() => {
     return tickets.filter((ticket) => {
@@ -78,10 +88,11 @@ function HelpDeskApp({ session, setSession }) {
   }
 
   function createTicket(ticket) {
+    const now = new Date().toISOString();
     const nextTicket = {
       ...ticket,
       id: `HD-${String(tickets.length + 101).padStart(4, '0')}`,
-      createdAt: new Date().toISOString(),
+      createdAt: now,
       requester: currentUser.name,
       requesterEmail: currentUser.email,
       comments: [
@@ -89,7 +100,18 @@ function HelpDeskApp({ session, setSession }) {
           author: currentUser.name,
           role: currentUser.role,
           body: 'Ticket creado desde el portal de mesa de ayuda.',
-          at: new Date().toISOString()
+          at: now
+        }
+      ],
+      history: [
+        {
+          author: currentUser.name,
+          role: currentUser.role,
+          action: 'Ticket creado',
+          field: 'ticket',
+          from: '',
+          to: 'Abierto',
+          at: now
         }
       ]
     };
@@ -100,7 +122,30 @@ function HelpDeskApp({ session, setSession }) {
   }
 
   function updateTicket(ticketId, patch) {
-    setTickets((items) => items.map((ticket) => (ticket.id === ticketId ? { ...ticket, ...patch } : ticket)));
+    setTickets((items) =>
+      items.map((ticket) => {
+        if (ticket.id !== ticketId) return ticket;
+
+        const auditedFields = ['status', 'priority', 'assignee'];
+        const historyEntries = auditedFields
+          .filter((field) => patch[field] !== undefined && patch[field] !== ticket[field])
+          .map((field) => ({
+            author: currentUser.name,
+            role: currentUser.role,
+            action: getAuditLabel(field),
+            field,
+            from: ticket[field],
+            to: patch[field],
+            at: new Date().toISOString()
+          }));
+
+        return {
+          ...ticket,
+          ...patch,
+          history: [...(ticket.history ?? []), ...historyEntries]
+        };
+      })
+    );
   }
 
   function addComment(ticketId, body) {
@@ -302,7 +347,7 @@ function Dashboard({ stats }) {
       <Metric icon={<Ticket />} label="Tickets totales" value={stats.total} trend="+12% esta semana" />
       <Metric icon={<AlertCircle />} label="Alta prioridad" value={stats.high} trend={`${stats.slaRisk} con riesgo SLA`} />
       <Metric icon={<Clock3 />} label="En progreso" value={stats.inProgress} trend="Tiempo medio 3.4h" />
-      <Metric icon={<CheckCircle2 />} label="Resueltos" value={stats.resolved} trend="Satisfaccion 94%" />
+      <Metric icon={<CheckCircle2 />} label="SLA vencidos" value={stats.slaExpired} trend={`${stats.resolved} tickets resueltos`} />
     </section>
   );
 }
@@ -319,22 +364,47 @@ function Metric({ icon, label, value, trend }) {
 }
 
 function KanbanBoard({ canManage, tickets, onOpen, onMove }) {
+  const [dragOverStatus, setDragOverStatus] = useState('');
   const groupedTickets = statuses.map((status) => ({
     status,
     tickets: tickets.filter((ticket) => ticket.status === status)
   }));
 
+  function handleDrop(event, status) {
+    event.preventDefault();
+    const ticketId = event.dataTransfer.getData('text/plain');
+    setDragOverStatus('');
+    if (ticketId && canManage) {
+      onMove(ticketId, status);
+    }
+  }
+
   return (
     <section className="kanban-board">
       {groupedTickets.map((column) => (
-        <article className="kanban-column" key={column.status}>
+        <article
+          className={`kanban-column ${dragOverStatus === column.status ? 'drag-over' : ''}`}
+          key={column.status}
+          onDragOver={(event) => {
+            if (!canManage) return;
+            event.preventDefault();
+            setDragOverStatus(column.status);
+          }}
+          onDragLeave={() => setDragOverStatus('')}
+          onDrop={(event) => handleDrop(event, column.status)}
+        >
           <header>
             <h2>{column.status}</h2>
             <span>{column.tickets.length}</span>
           </header>
           <div className="kanban-list">
             {column.tickets.map((ticket) => (
-              <div className="kanban-card" key={ticket.id}>
+              <div
+                className="kanban-card"
+                draggable={canManage}
+                key={ticket.id}
+                onDragStart={(event) => event.dataTransfer.setData('text/plain', ticket.id)}
+              >
                 <button className="kanban-open" type="button" onClick={() => onOpen(ticket.id)}>
                   <strong>{ticket.title}</strong>
                   <span>{ticket.id} - {ticket.requester}</span>
@@ -343,6 +413,7 @@ function KanbanBoard({ canManage, tickets, onOpen, onMove }) {
                   <Pill tone={ticket.priority}>{ticket.priority}</Pill>
                   <small>{ticket.assignee}</small>
                 </div>
+                <SlaBadge ticket={ticket} />
                 {canManage && (
                   <label className="move-field">
                     <span>Mover a</span>
@@ -398,6 +469,7 @@ function TicketPanel({ tickets, selectedId, filters, onFilter, onSelect }) {
             </div>
             <div className="row-meta">
               <Pill tone={ticket.priority}>{ticket.priority}</Pill>
+              <SlaBadge ticket={ticket} compact />
               <small>{ticket.status}</small>
             </div>
           </button>
@@ -437,6 +509,7 @@ function TicketDetail({ ticket, canManage, onUpdate, onComment }) {
         <Pill tone={ticket.priority}>{ticket.priority}</Pill>
       </div>
 
+      <SlaPanel ticket={ticket} />
       <p className="description">{ticket.description}</p>
 
       <div className="detail-controls">
@@ -482,12 +555,44 @@ function TicketDetail({ ticket, canManage, onUpdate, onComment }) {
         ))}
       </div>
 
+      <div className="history">
+        <h3><ShieldCheck size={17} />Historial de cambios</h3>
+        {(ticket.history ?? []).map((item, index) => (
+          <article className="history-item" key={`${item.at}-${index}`}>
+            <div>
+              <strong>{item.action}</strong>
+              <span>{item.author} - {formatDate(item.at)}</span>
+            </div>
+            <p>{item.from ? `${item.from} -> ${item.to}` : item.to}</p>
+          </article>
+        ))}
+      </div>
+
       <form className="comment-form" onSubmit={submitComment}>
         <input value={comment} onChange={(event) => setComment(event.target.value)} placeholder="Agregar comentario interno o respuesta al usuario" />
         <button className="secondary-button" type="submit">Comentar</button>
       </form>
     </section>
   );
+}
+
+function SlaPanel({ ticket }) {
+  const sla = getSla(ticket);
+
+  return (
+    <div className={`sla-panel ${sla.tone}`}>
+      <div>
+        <strong>{sla.label}</strong>
+        <span>{sla.detail}</span>
+      </div>
+      <small>Objetivo: {sla.limitHours}h desde creacion</small>
+    </div>
+  );
+}
+
+function SlaBadge({ ticket, compact = false }) {
+  const sla = getSla(ticket);
+  return <span className={`sla-badge ${sla.tone} ${compact ? 'compact' : ''}`}>{sla.shortLabel}</span>;
 }
 
 function TicketModal({ onClose, onCreate }) {
@@ -579,8 +684,97 @@ function getStats(tickets) {
     high: tickets.filter((ticket) => ticket.priority === 'Alta').length,
     inProgress: tickets.filter((ticket) => ticket.status === 'En progreso').length,
     resolved: tickets.filter((ticket) => ticket.status === 'Resuelto').length,
-    slaRisk: tickets.filter((ticket) => ticket.priority === 'Alta' && ticket.status !== 'Resuelto').length
+    slaRisk: tickets.filter((ticket) => {
+      const sla = getSla(ticket);
+      return sla.tone === 'risk' || sla.tone === 'expired';
+    }).length,
+    slaExpired: tickets.filter((ticket) => getSla(ticket).tone === 'expired').length
   };
+}
+
+function getSla(ticket) {
+  if (ticket.status === 'Resuelto') {
+    return {
+      tone: 'ok',
+      label: 'SLA cumplido',
+      shortLabel: 'SLA OK',
+      detail: 'Ticket resuelto dentro del flujo de atencion.',
+      limitHours: slaHoursByPriority[ticket.priority] ?? 24
+    };
+  }
+
+  const limitHours = slaHoursByPriority[ticket.priority] ?? 24;
+  const createdAt = new Date(ticket.createdAt).getTime();
+  const dueAt = createdAt + limitHours * 60 * 60 * 1000;
+  const remainingMs = dueAt - Date.now();
+  const absoluteHours = Math.max(1, Math.ceil(Math.abs(remainingMs) / (60 * 60 * 1000)));
+
+  if (remainingMs < 0) {
+    return {
+      tone: 'expired',
+      label: 'SLA vencido',
+      shortLabel: 'Vencido',
+      detail: `Vencio hace ${absoluteHours}h.`,
+      limitHours
+    };
+  }
+
+  if (remainingMs <= limitHours * 60 * 60 * 1000 * 0.25) {
+    return {
+      tone: 'risk',
+      label: 'SLA por vencer',
+      shortLabel: 'Riesgo SLA',
+      detail: `Quedan ${absoluteHours}h para cumplir el objetivo.`,
+      limitHours
+    };
+  }
+
+  return {
+    tone: 'ok',
+    label: 'SLA en plazo',
+    shortLabel: 'En plazo',
+    detail: `Quedan ${absoluteHours}h para cumplir el objetivo.`,
+    limitHours
+  };
+}
+
+function loadStoredTickets() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (!stored) return normalizeTickets(seedTickets);
+    const parsed = JSON.parse(stored);
+    return Array.isArray(parsed) ? normalizeTickets(parsed) : normalizeTickets(seedTickets);
+  } catch {
+    return normalizeTickets(seedTickets);
+  }
+}
+
+function normalizeTickets(tickets) {
+  return tickets.map((ticket) => ({
+    ...ticket,
+    history: ticket.history?.length
+      ? ticket.history
+      : [
+          {
+            author: 'Sistema',
+            role: 'Auditoria',
+            action: 'Ticket registrado',
+            field: 'ticket',
+            from: '',
+            to: ticket.status,
+            at: ticket.createdAt
+          }
+        ]
+  }));
+}
+
+function getAuditLabel(field) {
+  const labels = {
+    status: 'Estado actualizado',
+    priority: 'Prioridad actualizada',
+    assignee: 'Tecnico reasignado'
+  };
+  return labels[field] ?? 'Ticket actualizado';
 }
 
 function formatDate(value) {

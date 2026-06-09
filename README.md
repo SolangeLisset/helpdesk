@@ -66,11 +66,23 @@ http://127.0.0.1:5173
 npm run build
 ```
 
+## Deploy en Netlify
+
+El proyecto incluye `netlify.toml` con la configuracion correcta:
+
+```text
+Build command: npm run build
+Publish directory: dist
+```
+
+Si Netlify publica la raiz del proyecto en vez de `dist`, puede aparecer un error MIME al cargar `/src/main.jsx`.
+
 ## Estructura
 
 ```text
 helpdesk-react/
   index.html
+  netlify.toml
   package.json
   src/
     main.jsx

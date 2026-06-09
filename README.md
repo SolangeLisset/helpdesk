@@ -9,6 +9,7 @@ SolangeLisset
 ## Funciones
 
 - Dashboard con metricas de tickets.
+- Pantalla de login protegida.
 - Creacion de tickets.
 - Prioridad: Alta, Media y Baja.
 - Estado: Abierto, En progreso, Pendiente y Resuelto.
@@ -16,8 +17,23 @@ SolangeLisset
 - Comentarios por ticket.
 - Adjuntos simulados.
 - Filtros por busqueda, prioridad, estado y tecnico.
+- Vista Kanban para revisar y mover tickets por estado.
 - Roles simulados: Administrador, Tecnico y Usuario.
 - JWT simulado para representar sesion activa.
+
+## Acceso demo
+
+La aplicacion usa usuarios demo para simular roles y permisos.
+
+```text
+Clave: demo123
+```
+
+Usuarios disponibles:
+
+- Paula Admin - Administrador
+- Diego Tecnico - Tecnico
+- Marcos Usuario - Usuario
 
 ## Tecnologias
 

@@ -6,7 +6,10 @@ import {
   CheckCircle2,
   Clock3,
   Filter,
+  KanbanSquare,
   KeyRound,
+  LayoutList,
+  LogIn,
   LogOut,
   MessageSquare,
   Paperclip,
@@ -15,7 +18,6 @@ import {
   ShieldCheck,
   SlidersHorizontal,
   Ticket,
-  UserCog,
   Users,
   X
 } from 'lucide-react';
@@ -28,12 +30,19 @@ const statuses = ['Abierto', 'En progreso', 'Pendiente', 'Resuelto'];
 const categories = ['Hardware', 'Software', 'Red', 'Accesos', 'Seguridad', 'General'];
 
 function App() {
-  const [session, setSession] = useState(() => {
-    const jwt = createFakeJwt(users[0]);
-    return { jwt, user: decodeFakeJwt(jwt) };
-  });
+  const [session, setSession] = useState(null);
+
+  if (!session) {
+    return <LoginScreen onLogin={setSession} />;
+  }
+
+  return <HelpDeskApp session={session} setSession={setSession} />;
+}
+
+function HelpDeskApp({ session, setSession }) {
   const [tickets, setTickets] = useState(seedTickets);
   const [selectedId, setSelectedId] = useState(seedTickets[0].id);
+  const [activeView, setActiveView] = useState('dashboard');
   const [filters, setFilters] = useState({
     search: '',
     priority: 'Todas',
@@ -45,6 +54,7 @@ function App() {
   const currentUser = session.user;
   const isAdmin = currentUser.role === 'Administrador';
   const isTech = currentUser.role === 'Tecnico';
+  const canManage = isAdmin || isTech;
 
   const visibleTickets = useMemo(() => {
     return tickets.filter((ticket) => {
@@ -85,6 +95,7 @@ function App() {
     };
     setTickets((items) => [nextTicket, ...items]);
     setSelectedId(nextTicket.id);
+    setActiveView('tickets');
     setNewTicketOpen(false);
   }
 
@@ -107,36 +118,109 @@ function App() {
     );
   }
 
+  function openTicket(ticketId) {
+    setSelectedId(ticketId);
+    setActiveView('tickets');
+  }
+
   return (
     <div className="app-shell">
-      <Sidebar user={currentUser} jwt={session.jwt} onSwitchUser={switchUser} />
+      <Sidebar
+        activeView={activeView}
+        user={currentUser}
+        jwt={session.jwt}
+        onLogout={() => setSession(null)}
+        onSwitchUser={switchUser}
+        onView={setActiveView}
+      />
       <main className="workspace">
-        <Header onCreate={() => setNewTicketOpen(true)} />
-        <Dashboard stats={stats} />
-        <section className="content-grid">
-          <TicketPanel
+        <Header activeView={activeView} onCreate={() => setNewTicketOpen(true)} />
+        {(activeView === 'dashboard' || activeView === 'tickets') && <Dashboard stats={stats} />}
+        {activeView === 'kanban' ? (
+          <KanbanBoard
+            canManage={canManage}
             tickets={visibleTickets}
-            selectedId={selectedTicket?.id}
-            filters={filters}
-            onFilter={setFilters}
-            onSelect={setSelectedId}
+            onOpen={openTicket}
+            onMove={(ticketId, status) => updateTicket(ticketId, { status })}
           />
-          {selectedTicket && (
-            <TicketDetail
-              ticket={selectedTicket}
-              canManage={isAdmin || isTech}
-              onUpdate={(patch) => updateTicket(selectedTicket.id, patch)}
-              onComment={(body) => addComment(selectedTicket.id, body)}
+        ) : (
+          <section className="content-grid">
+            <TicketPanel
+              tickets={visibleTickets}
+              selectedId={selectedTicket?.id}
+              filters={filters}
+              onFilter={setFilters}
+              onSelect={setSelectedId}
             />
-          )}
-        </section>
+            {selectedTicket && (
+              <TicketDetail
+                ticket={selectedTicket}
+                canManage={canManage}
+                onUpdate={(patch) => updateTicket(selectedTicket.id, patch)}
+                onComment={(body) => addComment(selectedTicket.id, body)}
+              />
+            )}
+          </section>
+        )}
       </main>
       {newTicketOpen && <TicketModal onClose={() => setNewTicketOpen(false)} onCreate={createTicket} />}
     </div>
   );
 }
 
-function Sidebar({ user, jwt, onSwitchUser }) {
+function LoginScreen({ onLogin }) {
+  const [userId, setUserId] = useState(users[0].id);
+  const [password, setPassword] = useState('demo123');
+  const [error, setError] = useState('');
+  const selectedUser = users.find((user) => user.id === userId);
+
+  function submit(event) {
+    event.preventDefault();
+    if (password !== 'demo123') {
+      setError('Clave demo incorrecta. Usa demo123.');
+      return;
+    }
+    const jwt = createFakeJwt(selectedUser);
+    onLogin({ jwt, user: decodeFakeJwt(jwt) });
+  }
+
+  return (
+    <main className="login-shell">
+      <section className="login-card">
+        <div className="brand login-brand">
+          <div className="brand-mark"><Ticket size={22} /></div>
+          <div>
+            <strong>Mesa de Ayuda</strong>
+            <span>Acceso protegido</span>
+          </div>
+        </div>
+        <div>
+          <p className="eyebrow">Portal empresarial</p>
+          <h1>Iniciar sesion</h1>
+          <p className="login-copy">Selecciona un perfil demo para probar permisos, tickets y tablero Kanban.</p>
+        </div>
+        <form className="login-form" onSubmit={submit}>
+          <label className="field">
+            <span>Usuario</span>
+            <select value={userId} onChange={(event) => setUserId(event.target.value)}>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>{user.name} - {user.role}</option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>Clave</span>
+            <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" />
+          </label>
+          {error && <p className="form-error">{error}</p>}
+          <button className="primary-button full" type="submit"><LogIn size={18} />Entrar</button>
+        </form>
+      </section>
+    </main>
+  );
+}
+
+function Sidebar({ activeView, user, jwt, onLogout, onSwitchUser, onView }) {
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -148,10 +232,21 @@ function Sidebar({ user, jwt, onSwitchUser }) {
       </div>
 
       <nav className="nav-list" aria-label="Principal">
-        <a className="active" href="#dashboard"><BarChart3 size={18} />Dashboard</a>
-        <a href="#tickets"><Ticket size={18} />Tickets</a>
-        <a href="#equipo"><Users size={18} />Tecnicos</a>
-        <a href="#seguridad"><ShieldCheck size={18} />Seguridad</a>
+        <button className={activeView === 'dashboard' ? 'active' : ''} type="button" onClick={() => onView('dashboard')}>
+          <BarChart3 size={18} />Dashboard
+        </button>
+        <button className={activeView === 'tickets' ? 'active' : ''} type="button" onClick={() => onView('tickets')}>
+          <LayoutList size={18} />Tickets
+        </button>
+        <button className={activeView === 'kanban' ? 'active' : ''} type="button" onClick={() => onView('kanban')}>
+          <KanbanSquare size={18} />Kanban
+        </button>
+        <button type="button" onClick={() => onView('dashboard')}>
+          <Users size={18} />Tecnicos
+        </button>
+        <button type="button" onClick={() => onView('dashboard')}>
+          <ShieldCheck size={18} />Seguridad
+        </button>
       </nav>
 
       <div className="session-card">
@@ -176,17 +271,23 @@ function Sidebar({ user, jwt, onSwitchUser }) {
         <code>{jwt}</code>
       </div>
 
-      <button className="ghost-button" type="button"><LogOut size={16} />Cerrar sesion</button>
+      <button className="ghost-button" type="button" onClick={onLogout}><LogOut size={16} />Cerrar sesion</button>
     </aside>
   );
 }
 
-function Header({ onCreate }) {
+function Header({ activeView, onCreate }) {
+  const titleByView = {
+    dashboard: 'Centro de soporte',
+    tickets: 'Gestion de tickets',
+    kanban: 'Tablero Kanban'
+  };
+
   return (
     <header className="topbar">
       <div>
         <p className="eyebrow">Operacion TI</p>
-        <h1>Centro de soporte</h1>
+        <h1>{titleByView[activeView]}</h1>
       </div>
       <button className="primary-button" type="button" onClick={onCreate}>
         <Plus size={18} />Crear ticket
@@ -214,6 +315,49 @@ function Metric({ icon, label, value, trend }) {
       <strong>{value}</strong>
       <small>{trend}</small>
     </article>
+  );
+}
+
+function KanbanBoard({ canManage, tickets, onOpen, onMove }) {
+  const groupedTickets = statuses.map((status) => ({
+    status,
+    tickets: tickets.filter((ticket) => ticket.status === status)
+  }));
+
+  return (
+    <section className="kanban-board">
+      {groupedTickets.map((column) => (
+        <article className="kanban-column" key={column.status}>
+          <header>
+            <h2>{column.status}</h2>
+            <span>{column.tickets.length}</span>
+          </header>
+          <div className="kanban-list">
+            {column.tickets.map((ticket) => (
+              <div className="kanban-card" key={ticket.id}>
+                <button className="kanban-open" type="button" onClick={() => onOpen(ticket.id)}>
+                  <strong>{ticket.title}</strong>
+                  <span>{ticket.id} - {ticket.requester}</span>
+                </button>
+                <div className="kanban-meta">
+                  <Pill tone={ticket.priority}>{ticket.priority}</Pill>
+                  <small>{ticket.assignee}</small>
+                </div>
+                {canManage && (
+                  <label className="move-field">
+                    <span>Mover a</span>
+                    <select value={ticket.status} onChange={(event) => onMove(ticket.id, event.target.value)}>
+                      {statuses.map((status) => <option key={status}>{status}</option>)}
+                    </select>
+                  </label>
+                )}
+              </div>
+            ))}
+            {!column.tickets.length && <p className="empty-column">Sin tickets</p>}
+          </div>
+        </article>
+      ))}
+    </section>
   );
 }
 
@@ -250,7 +394,7 @@ function TicketPanel({ tickets, selectedId, filters, onFilter, onSelect }) {
           >
             <div>
               <strong>{ticket.title}</strong>
-              <span>{ticket.id} · {ticket.requester}</span>
+              <span>{ticket.id} - {ticket.requester}</span>
             </div>
             <div className="row-meta">
               <Pill tone={ticket.priority}>{ticket.priority}</Pill>
@@ -287,7 +431,7 @@ function TicketDetail({ ticket, canManage, onUpdate, onComment }) {
     <section className="panel detail-panel">
       <div className="detail-header">
         <div>
-          <p className="eyebrow">{ticket.id} · {ticket.category}</p>
+          <p className="eyebrow">{ticket.id} - {ticket.category}</p>
           <h2>{ticket.title}</h2>
         </div>
         <Pill tone={ticket.priority}>{ticket.priority}</Pill>
@@ -331,7 +475,7 @@ function TicketDetail({ ticket, canManage, onUpdate, onComment }) {
           <article className="comment" key={`${item.at}-${index}`}>
             <div>
               <strong>{item.author}</strong>
-              <span>{item.role} · {formatDate(item.at)}</span>
+              <span>{item.role} - {formatDate(item.at)}</span>
             </div>
             <p>{item.body}</p>
           </article>

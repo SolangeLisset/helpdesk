@@ -33,6 +33,48 @@ button {
   min-height: 100vh;
 }
 
+.login-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    linear-gradient(rgba(238, 243, 247, 0.82), rgba(238, 243, 247, 0.92)),
+    url("https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1600&q=80") center / cover;
+}
+
+.login-card {
+  width: min(480px, 100%);
+  display: grid;
+  gap: 22px;
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid #dbe4ed;
+  border-radius: 8px;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
+}
+
+.login-brand {
+  color: #17212f;
+}
+
+.login-copy {
+  margin: 8px 0 0;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.login-form {
+  display: grid;
+  gap: 14px;
+}
+
+.form-error {
+  margin: 0;
+  color: #b91c1c;
+  font-weight: 700;
+}
+
 .sidebar {
   background: #17212f;
   color: #f8fafc;
@@ -48,6 +90,7 @@ button {
 .brand,
 .session-card,
 .nav-list a,
+.nav-list button,
 .token-box div,
 .ghost-button,
 .primary-button,
@@ -73,6 +116,7 @@ button {
 .brand span,
 .session-card span,
 .nav-list a,
+.nav-list button,
 .token-box,
 .metric span,
 .metric small,
@@ -87,6 +131,7 @@ button {
 .sidebar .brand span,
 .sidebar .session-card span,
 .sidebar .nav-list a,
+.sidebar .nav-list button,
 .sidebar .token-box {
   color: #c8d3df;
 }
@@ -111,16 +156,22 @@ button {
   gap: 8px;
 }
 
-.nav-list a {
+.nav-list a,
+.nav-list button {
   gap: 10px;
   padding: 11px 12px;
   border-radius: 8px;
   color: #d9e3ee;
   text-decoration: none;
+  border: 0;
+  background: transparent;
+  text-align: left;
 }
 
 .nav-list a.active,
-.nav-list a:hover {
+.nav-list a:hover,
+.nav-list button.active,
+.nav-list button:hover {
   background: #263449;
   color: #ffffff;
 }
@@ -288,6 +339,123 @@ h3 {
   grid-template-columns: minmax(360px, 0.85fr) minmax(420px, 1.15fr);
   gap: 18px;
   align-items: start;
+}
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(240px, 1fr));
+  gap: 14px;
+  align-items: start;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.kanban-column {
+  min-height: 520px;
+  padding: 14px;
+  background: #ffffff;
+  border: 1px solid #dbe4ed;
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.kanban-column header,
+.kanban-meta,
+.move-field {
+  display: flex;
+  align-items: center;
+}
+
+.kanban-column header {
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.kanban-column header h2 {
+  font-size: 16px;
+}
+
+.kanban-column header span {
+  display: grid;
+  place-items: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: #e8eef4;
+  color: #334155;
+  font-weight: 800;
+}
+
+.kanban-list {
+  display: grid;
+  gap: 10px;
+}
+
+.kanban-card {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.kanban-open {
+  display: grid;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #17212f;
+  text-align: left;
+}
+
+.kanban-open strong,
+.kanban-open span {
+  overflow-wrap: anywhere;
+}
+
+.kanban-open span,
+.kanban-meta small,
+.move-field span,
+.empty-column {
+  color: #64748b;
+}
+
+.kanban-meta {
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.move-field {
+  gap: 8px;
+}
+
+.move-field span {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.move-field select {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid #d5dfe8;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #17212f;
+  padding: 0 8px;
+}
+
+.empty-column {
+  margin: 0;
+  padding: 14px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  text-align: center;
 }
 
 .panel {
@@ -558,6 +726,10 @@ h3 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .kanban-board {
+    grid-template-columns: repeat(4, minmax(260px, 1fr));
+  }
+
   .detail-panel {
     grid-column: 1 / -1;
   }
@@ -589,6 +761,15 @@ h3 {
   .form-grid,
   .comment-form {
     grid-template-columns: 1fr;
+  }
+
+  .kanban-board {
+    grid-template-columns: 1fr;
+    overflow-x: visible;
+  }
+
+  .kanban-column {
+    min-height: auto;
   }
 
   .ticket-row {

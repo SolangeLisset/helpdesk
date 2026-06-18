@@ -7,6 +7,7 @@ import { TicketDetail } from '../components/TicketDetail.jsx';
 import { TicketModal } from '../components/TicketModal.jsx';
 import { TicketPanel } from '../components/TicketPanel.jsx';
 import { useTickets } from '../hooks/useTickets.js';
+import { ReportsPage } from './ReportsPage.jsx';
 import { users } from '../mockData.js';
 import { createFakeJwt, decodeFakeJwt } from '../utils/auth.js';
 import { filterTickets, getStats } from '../utils/tickets.js';
@@ -17,7 +18,9 @@ export function HelpDeskPage({ session, setSession }) {
     search: '',
     priority: 'Todas',
     status: 'Todos',
-    technician: 'Todos'
+    technician: 'Todos',
+    dateFrom: '',
+    dateTo: ''
   });
   const [newTicketOpen, setNewTicketOpen] = useState(false);
 
@@ -66,7 +69,9 @@ export function HelpDeskPage({ session, setSession }) {
       <main className="workspace">
         <Header activeView={activeView} onCreate={() => setNewTicketOpen(true)} />
         {(activeView === 'dashboard' || activeView === 'tickets') && <Dashboard stats={stats} />}
-        {activeView === 'kanban' ? (
+        {activeView === 'reports' ? (
+          <ReportsPage tickets={visibleTickets} />
+        ) : activeView === 'kanban' ? (
           <KanbanBoard
             canManage={canManage}
             tickets={visibleTickets}

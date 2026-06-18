@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { applyTicketPatch, createTicketRecord, getSla, getStats } from './tickets.js';
+import { applyTicketPatch, createTicketRecord, getReportMetrics, getSla, getStats } from './tickets.js';
 
 const user = {
   id: 'usr-1',
@@ -79,5 +79,18 @@ describe('ticket business rules', () => {
     assert.equal(stats.total, 2);
     assert.equal(stats.slaExpired, 1);
     assert.equal(stats.resolved, 1);
+  });
+
+  it('groups report metrics by status, priority and technician', () => {
+    const metrics = getReportMetrics([
+      baseTicket,
+      { ...baseTicket, id: 'HD-0002', status: 'Resuelto', priority: 'Baja' }
+    ]);
+
+    assert.equal(metrics.byStatus.Abierto, 1);
+    assert.equal(metrics.byStatus.Resuelto, 1);
+    assert.equal(metrics.byPriority.Alta, 1);
+    assert.equal(metrics.byPriority.Baja, 1);
+    assert.equal(metrics.byTechnician['Camila Torres'], 2);
   });
 });

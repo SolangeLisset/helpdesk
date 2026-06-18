@@ -40,6 +40,24 @@ export function TicketPanel({ tickets, selectedId, filters, onFilter, onSelect }
           onChange={(technician) => onFilter({ ...filters, technician })}
           options={['Todos', ...technicians.map((item) => item.name)]}
         />
+        <div className="date-filters">
+          <label className="field">
+            <span>Desde</span>
+            <input
+              type="date"
+              value={filters.dateFrom}
+              onChange={(event) => onFilter({ ...filters, dateFrom: event.target.value })}
+            />
+          </label>
+          <label className="field">
+            <span>Hasta</span>
+            <input
+              type="date"
+              value={filters.dateTo}
+              onChange={(event) => onFilter({ ...filters, dateTo: event.target.value })}
+            />
+          </label>
+        </div>
       </div>
       <div className="ticket-list">
         {tickets.map((ticket) => (

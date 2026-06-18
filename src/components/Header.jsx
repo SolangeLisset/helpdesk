@@ -3,7 +3,8 @@ import { Plus } from 'lucide-react';
 const titleByView = {
   dashboard: 'Centro de soporte',
   tickets: 'Gestion de tickets',
-  kanban: 'Tablero Kanban'
+  kanban: 'Tablero Kanban',
+  reports: 'Reportes'
 };
 
 export function Header({ activeView, onCreate }) {

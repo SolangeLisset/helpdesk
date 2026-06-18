@@ -73,6 +73,11 @@ Cada ticket muestra SLA visual por prioridad y un historial de cambios para audi
 - Drag and drop en Kanban para cambiar estados.
 - SLA visual por prioridad.
 - Historial de cambios para estado, prioridad y tecnico.
+- Reportes con graficos por estado, prioridad y tecnico.
+- Tiempo promedio de resolucion.
+- Tickets vencidos por tecnico.
+- Exportacion de reportes a CSV y vista imprimible PDF.
+- Filtros por rango de fecha.
 - Roles simulados: Administrador, Tecnico y Usuario.
 - JWT simulado para representar sesion activa.
 

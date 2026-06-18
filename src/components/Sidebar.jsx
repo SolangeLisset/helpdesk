@@ -4,6 +4,7 @@ import {
   KeyRound,
   LayoutList,
   LogOut,
+  PieChart,
   ShieldCheck,
   Ticket,
   Users
@@ -47,6 +48,14 @@ export function Sidebar({ activeView, user, jwt, onLogout, onSwitchUser, onView 
         >
           <KanbanSquare size={18} />
           Kanban
+        </button>
+        <button
+          className={activeView === 'reports' ? 'active' : ''}
+          type="button"
+          onClick={() => onView('reports')}
+        >
+          <PieChart size={18} />
+          Reportes
         </button>
         <button type="button" onClick={() => onView('dashboard')}>
           <Users size={18} />

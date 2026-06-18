@@ -12,8 +12,19 @@ export function filterTickets(tickets, filters, currentUser) {
     const matchesPriority = filters.priority === 'Todas' || ticket.priority === filters.priority;
     const matchesStatus = filters.status === 'Todos' || ticket.status === filters.status;
     const matchesTech = filters.technician === 'Todos' || ticket.assignee === filters.technician;
+    const createdAt = new Date(ticket.createdAt).getTime();
+    const matchesDateFrom = !filters.dateFrom || createdAt >= new Date(filters.dateFrom).getTime();
+    const matchesDateTo = !filters.dateTo || createdAt <= new Date(`${filters.dateTo}T23:59:59`).getTime();
     const matchesRole = isAdmin || isTech || ticket.requesterEmail === currentUser.email;
-    return matchesSearch && matchesPriority && matchesStatus && matchesTech && matchesRole;
+    return (
+      matchesSearch &&
+      matchesPriority &&
+      matchesStatus &&
+      matchesTech &&
+      matchesDateFrom &&
+      matchesDateTo &&
+      matchesRole
+    );
   });
 }
 
@@ -93,6 +104,49 @@ export function getStats(tickets, now = Date.now()) {
     }).length,
     slaExpired: tickets.filter((ticket) => getSla(ticket, now).tone === 'expired').length
   };
+}
+
+export function getReportMetrics(tickets, now = Date.now()) {
+  return {
+    byStatus: countBy(tickets, 'status'),
+    byPriority: countBy(tickets, 'priority'),
+    byTechnician: countBy(tickets, 'assignee'),
+    expiredByTechnician: getExpiredByTechnician(tickets, now),
+    averageResolutionHours: getAverageResolutionHours(tickets)
+  };
+}
+
+export function countBy(tickets, field) {
+  return tickets.reduce((acc, ticket) => {
+    const key = ticket[field] || 'Sin asignar';
+    acc[key] = (acc[key] ?? 0) + 1;
+    return acc;
+  }, {});
+}
+
+export function getExpiredByTechnician(tickets, now = Date.now()) {
+  return tickets.reduce((acc, ticket) => {
+    if (getSla(ticket, now).tone !== 'expired') return acc;
+    acc[ticket.assignee] = (acc[ticket.assignee] ?? 0) + 1;
+    return acc;
+  }, {});
+}
+
+export function getAverageResolutionHours(tickets) {
+  const resolvedDurations = tickets
+    .filter((ticket) => ticket.status === 'Resuelto')
+    .map((ticket) => {
+      const createdAt = new Date(ticket.createdAt).getTime();
+      const resolvedEntry = ticket.history?.find(
+        (entry) => entry.field === 'status' && entry.to === 'Resuelto'
+      );
+      const resolvedAt = resolvedEntry ? new Date(resolvedEntry.at).getTime() : createdAt;
+      return Math.max(0, resolvedAt - createdAt) / (60 * 60 * 1000);
+    });
+
+  if (!resolvedDurations.length) return 0;
+  const total = resolvedDurations.reduce((sum, hours) => sum + hours, 0);
+  return Number((total / resolvedDurations.length).toFixed(1));
 }
 
 export function getSla(ticket, now = Date.now()) {

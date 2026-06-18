@@ -18,11 +18,14 @@ export default [
       },
       globals: {
         atob: 'readonly',
+        Blob: 'readonly',
         btoa: 'readonly',
         console: 'readonly',
         document: 'readonly',
         localStorage: 'readonly',
-        React: 'readonly'
+        React: 'readonly',
+        URL: 'readonly',
+        window: 'readonly'
       }
     },
     plugins: {

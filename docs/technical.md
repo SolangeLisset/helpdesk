@@ -41,6 +41,18 @@ El resultado puede ser `ok`, `risk` o `expired`, y se muestra en el dashboard, l
 
 Cada cambio de estado, prioridad o tecnico genera una entrada en `history`. La auditoria registra autor, rol, campo modificado, valor anterior, nuevo valor y fecha.
 
+## Reportes
+
+La vista de reportes reutiliza los tickets filtrados por rol, busqueda y rango de fecha. Incluye:
+
+- Tickets por estado.
+- Tickets por prioridad.
+- Tickets por tecnico.
+- Tickets vencidos por tecnico.
+- Tiempo promedio de resolucion.
+- Exportacion CSV.
+- Vista imprimible para guardar como PDF desde el navegador.
+
 ## Tests
 
 Los tests usan `node:test` y validan reglas de negocio:

@@ -157,6 +157,16 @@ La API queda disponible en:
 http://127.0.0.1:4000/api
 ```
 
+## Conexion frontend-backend
+
+El frontend consume la API configurada en `VITE_API_URL`. Por defecto `.env.example` apunta al backend en Render:
+
+```text
+VITE_API_URL="https://helpdesk-7i2e.onrender.com/api"
+```
+
+Para produccion, configura esa misma variable en Netlify y `CLIENT_URL` en Render con el dominio del frontend.
+
 ## Crear build de produccion
 
 ```bash

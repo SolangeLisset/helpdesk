@@ -15,7 +15,8 @@ export function filterTickets(tickets, filters, currentUser) {
     const createdAt = new Date(ticket.createdAt).getTime();
     const matchesDateFrom = !filters.dateFrom || createdAt >= new Date(filters.dateFrom).getTime();
     const matchesDateTo = !filters.dateTo || createdAt <= new Date(`${filters.dateTo}T23:59:59`).getTime();
-    const matchesRole = isAdmin || isTech || ticket.requesterEmail === currentUser.email;
+    const matchesRole =
+      isAdmin || isTech || !ticket.requesterEmail || ticket.requesterEmail === currentUser.email;
     return (
       matchesSearch &&
       matchesPriority &&

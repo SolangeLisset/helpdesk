@@ -1,35 +1,27 @@
 import { Paperclip, X } from 'lucide-react';
 import { useState } from 'react';
 import { categories, priorities } from '../constants.js';
-import { technicians } from '../mockData.js';
 
-export function TicketModal({ onClose, onCreate }) {
+export function TicketModal({ technicians, onClose, onCreate }) {
   const [form, setForm] = useState({
     title: '',
     description: '',
     category: categories[0],
     priority: 'Media',
     status: 'Abierto',
-    assignee: technicians[0].name,
-    attachments: []
+    assignee_id: technicians[0]?.id || '',
+    files: []
   });
 
   function submit(event) {
     event.preventDefault();
-    const attachments = form.attachments.length
-      ? form.attachments
-      : [{ name: 'sin-adjuntos.txt', size: '0 KB', url: '#' }];
-    onCreate({ ...form, attachments });
+    onCreate(form);
   }
 
   function handleFiles(files) {
     setForm({
       ...form,
-      attachments: Array.from(files).map((file) => ({
-        name: file.name,
-        size: `${Math.max(1, Math.round(file.size / 1024))} KB`,
-        url: '#'
-      }))
+      files: Array.from(files)
     });
   }
 
@@ -88,11 +80,14 @@ export function TicketModal({ onClose, onCreate }) {
           <label className="field">
             <span>Tecnico</span>
             <select
-              value={form.assignee}
-              onChange={(event) => setForm({ ...form, assignee: event.target.value })}
+              value={form.assignee_id}
+              onChange={(event) => setForm({ ...form, assignee_id: event.target.value })}
             >
+              <option value="">Sin asignar</option>
               {technicians.map((tech) => (
-                <option key={tech.id}>{tech.name}</option>
+                <option key={tech.id} value={tech.id}>
+                  {tech.name}
+                </option>
               ))}
             </select>
           </label>
@@ -100,9 +95,7 @@ export function TicketModal({ onClose, onCreate }) {
         <label className="dropzone">
           <Paperclip size={18} />
           <span>
-            {form.attachments.length
-              ? `${form.attachments.length} adjunto(s) seleccionado(s)`
-              : 'Agregar adjuntos'}
+            {form.files.length ? `${form.files.length} adjunto(s) seleccionado(s)` : 'Agregar adjuntos'}
           </span>
           <input type="file" multiple onChange={(event) => handleFiles(event.target.files)} />
         </label>

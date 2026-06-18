@@ -10,10 +10,19 @@ dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 4000;
+const allowedOrigins = (process.env.CLIENT_URL || 'http://127.0.0.1:5173')
+  .split(',')
+  .map((origin) => origin.trim());
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || 'http://127.0.0.1:5173'
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+      callback(new Error('Origen no permitido por CORS'));
+    }
   })
 );
 app.use(express.json());

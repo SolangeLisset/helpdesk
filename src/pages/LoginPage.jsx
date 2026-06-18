@@ -1,22 +1,64 @@
-import { LogIn, Ticket } from 'lucide-react';
+import { KeyRound, LogIn, Mail, Ticket, UserPlus } from 'lucide-react';
 import { useState } from 'react';
-import { users } from '../mockData.js';
-import { createFakeJwt, decodeFakeJwt } from '../utils/auth.js';
+import { api } from '../utils/apiClient.js';
+
+const initialForms = {
+  login: { email: '', password: '' },
+  register: { name: '', email: '', password: '' },
+  forgot: { email: '' },
+  reset: { token: '', password: '' }
+};
 
 export function LoginPage({ onLogin }) {
-  const [userId, setUserId] = useState(users[0].id);
-  const [password, setPassword] = useState('demo123');
+  const [mode, setMode] = useState('login');
+  const [forms, setForms] = useState(initialForms);
   const [error, setError] = useState('');
-  const selectedUser = users.find((user) => user.id === userId);
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  function submit(event) {
+  function updateForm(formName, field, value) {
+    setForms((current) => ({
+      ...current,
+      [formName]: {
+        ...current[formName],
+        [field]: value
+      }
+    }));
+  }
+
+  async function submit(event) {
     event.preventDefault();
-    if (password !== 'demo123') {
-      setError('Clave demo incorrecta. Usa demo123.');
-      return;
+    setError('');
+    setMessage('');
+    setLoading(true);
+
+    try {
+      if (mode === 'login') {
+        const session = await api.login(forms.login);
+        onLogin({ jwt: session.token, user: session.user });
+      }
+
+      if (mode === 'register') {
+        const session = await api.register(forms.register);
+        onLogin({ jwt: session.token, user: session.user });
+      }
+
+      if (mode === 'forgot') {
+        const response = await api.forgotPassword(forms.forgot);
+        setMessage(response.message);
+        setMode('reset');
+      }
+
+      if (mode === 'reset') {
+        const response = await api.resetPassword(forms.reset);
+        setMessage(response.message);
+        setMode('login');
+      }
+    } catch (err) {
+      setError(err.message || 'No se pudo completar la accion');
+    } finally {
+      setLoading(false);
     }
-    const jwt = createFakeJwt(selectedUser);
-    onLogin({ jwt, user: decodeFakeJwt(jwt) });
   }
 
   return (
@@ -33,33 +75,155 @@ export function LoginPage({ onLogin }) {
         </div>
         <div>
           <p className="eyebrow">Portal empresarial</p>
-          <h1>Iniciar sesion</h1>
-          <p className="login-copy">
-            Selecciona un perfil demo para probar permisos, tickets y tablero Kanban.
-          </p>
+          <h1>{getTitle(mode)}</h1>
+          <p className="login-copy">{getCopy(mode)}</p>
         </div>
+
         <form className="login-form" onSubmit={submit}>
-          <label className="field">
-            <span>Usuario</span>
-            <select value={userId} onChange={(event) => setUserId(event.target.value)}>
-              {users.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.name} - {user.role}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>Clave</span>
-            <input value={password} onChange={(event) => setPassword(event.target.value)} type="password" />
-          </label>
+          {mode === 'login' && (
+            <>
+              <AuthInput
+                label="Email"
+                type="email"
+                value={forms.login.email}
+                onChange={(value) => updateForm('login', 'email', value)}
+              />
+              <AuthInput
+                label="Clave"
+                type="password"
+                value={forms.login.password}
+                onChange={(value) => updateForm('login', 'password', value)}
+              />
+            </>
+          )}
+
+          {mode === 'register' && (
+            <>
+              <AuthInput
+                label="Nombre"
+                value={forms.register.name}
+                onChange={(value) => updateForm('register', 'name', value)}
+              />
+              <AuthInput
+                label="Email"
+                type="email"
+                value={forms.register.email}
+                onChange={(value) => updateForm('register', 'email', value)}
+              />
+              <AuthInput
+                label="Clave"
+                type="password"
+                value={forms.register.password}
+                onChange={(value) => updateForm('register', 'password', value)}
+              />
+            </>
+          )}
+
+          {mode === 'forgot' && (
+            <AuthInput
+              label="Email"
+              type="email"
+              value={forms.forgot.email}
+              onChange={(value) => updateForm('forgot', 'email', value)}
+            />
+          )}
+
+          {mode === 'reset' && (
+            <>
+              <AuthInput
+                label="Token"
+                value={forms.reset.token}
+                onChange={(value) => updateForm('reset', 'token', value)}
+              />
+              <AuthInput
+                label="Nueva clave"
+                type="password"
+                value={forms.reset.password}
+                onChange={(value) => updateForm('reset', 'password', value)}
+              />
+            </>
+          )}
+
           {error && <p className="form-error">{error}</p>}
-          <button className="primary-button full" type="submit">
-            <LogIn size={18} />
-            Entrar
+          {message && <p className="form-success">{message}</p>}
+          <button className="primary-button full" type="submit" disabled={loading}>
+            {getIcon(mode)}
+            {loading ? 'Procesando...' : getButtonText(mode)}
           </button>
         </form>
+
+        <div className="auth-links">
+          {mode !== 'login' && (
+            <button type="button" onClick={() => setMode('login')}>
+              Iniciar sesion
+            </button>
+          )}
+          {mode !== 'register' && (
+            <button type="button" onClick={() => setMode('register')}>
+              Crear cuenta
+            </button>
+          )}
+          {mode !== 'forgot' && (
+            <button type="button" onClick={() => setMode('forgot')}>
+              Olvide mi clave
+            </button>
+          )}
+          {mode !== 'reset' && (
+            <button type="button" onClick={() => setMode('reset')}>
+              Tengo un token
+            </button>
+          )}
+        </div>
       </section>
     </main>
   );
+}
+
+function AuthInput({ label, onChange, type = 'text', value }) {
+  return (
+    <label className="field">
+      <span>{label}</span>
+      <input required type={type} value={value} onChange={(event) => onChange(event.target.value)} />
+    </label>
+  );
+}
+
+function getTitle(mode) {
+  const titles = {
+    login: 'Iniciar sesion',
+    register: 'Crear cuenta',
+    forgot: 'Recuperar clave',
+    reset: 'Restablecer clave'
+  };
+  return titles[mode];
+}
+
+function getCopy(mode) {
+  const copies = {
+    login: 'Ingresa con tu cuenta para gestionar tickets reales desde la API.',
+    register: 'Crea una cuenta de usuario para levantar solicitudes de soporte.',
+    forgot: 'Solicita un token de recuperacion. En demo se muestra en logs del backend.',
+    reset: 'Ingresa el token de recuperacion y define una nueva clave.'
+  };
+  return copies[mode];
+}
+
+function getButtonText(mode) {
+  const labels = {
+    login: 'Entrar',
+    register: 'Registrarme',
+    forgot: 'Enviar token',
+    reset: 'Cambiar clave'
+  };
+  return labels[mode];
+}
+
+function getIcon(mode) {
+  const icons = {
+    login: <LogIn size={18} />,
+    register: <UserPlus size={18} />,
+    forgot: <Mail size={18} />,
+    reset: <KeyRound size={18} />
+  };
+  return icons[mode];
 }

@@ -1,7 +1,15 @@
 import { X } from 'lucide-react';
 import { TicketDetail } from './TicketDetail.jsx';
 
-export function TicketDetailModal({ ticket, canManage, onClose, onComment, onUpdate }) {
+export function TicketDetailModal({
+  ticket,
+  canManage,
+  technicians,
+  onClose,
+  onComment,
+  onDownloadAttachment,
+  onUpdate
+}) {
   if (!ticket) return null;
 
   return (
@@ -16,7 +24,14 @@ export function TicketDetailModal({ ticket, canManage, onClose, onComment, onUpd
             <X size={18} />
           </button>
         </div>
-        <TicketDetail ticket={ticket} canManage={canManage} onUpdate={onUpdate} onComment={onComment} />
+        <TicketDetail
+          ticket={ticket}
+          canManage={canManage}
+          technicians={technicians}
+          onDownloadAttachment={onDownloadAttachment}
+          onUpdate={onUpdate}
+          onComment={onComment}
+        />
       </section>
     </div>
   );

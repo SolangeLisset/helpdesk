@@ -1,12 +1,11 @@
 import { MessageSquare, Paperclip, ShieldCheck } from 'lucide-react';
 import { priorities, statuses } from '../constants.js';
-import { technicians } from '../mockData.js';
 import { formatDate } from '../utils/format.js';
 import { Pill } from './common/Pill.jsx';
 import { SlaPanel } from './sla/SlaPanel.jsx';
 import { useState } from 'react';
 
-export function TicketDetail({ ticket, canManage, onUpdate, onComment }) {
+export function TicketDetail({ ticket, canManage, technicians, onDownloadAttachment, onUpdate, onComment }) {
   const [comment, setComment] = useState('');
 
   function submitComment(event) {
@@ -47,11 +46,14 @@ export function TicketDetail({ ticket, canManage, onUpdate, onComment }) {
           <span>Asignado a</span>
           <select
             disabled={!canManage}
-            value={ticket.assignee}
-            onChange={(event) => onUpdate({ assignee: event.target.value })}
+            value={ticket.assigneeId}
+            onChange={(event) => onUpdate({ assignee_id: event.target.value || null })}
           >
+            <option value="">Sin asignar</option>
             {technicians.map((tech) => (
-              <option key={tech.id}>{tech.name}</option>
+              <option key={tech.id} value={tech.id}>
+                {tech.name}
+              </option>
             ))}
           </select>
         </label>
@@ -75,12 +77,18 @@ export function TicketDetail({ ticket, canManage, onUpdate, onComment }) {
           Adjuntos
         </h3>
         {ticket.attachments.map((attachment) => (
-          <a key={attachment.name} href={attachment.url} className="attachment">
+          <button
+            key={attachment.id || attachment.name}
+            type="button"
+            className="attachment"
+            onClick={() => onDownloadAttachment?.(attachment)}
+          >
             <Paperclip size={15} />
             {attachment.name}
             <span>{attachment.size}</span>
-          </a>
+          </button>
         ))}
+        {!ticket.attachments.length && <p className="muted-line">Sin adjuntos.</p>}
       </div>
 
       <div className="comments">

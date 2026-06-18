@@ -10,9 +10,8 @@ import {
   Ticket,
   Users
 } from 'lucide-react';
-import { users } from '../mockData.js';
 
-export function Sidebar({ activeView, theme, user, jwt, onLogout, onSwitchUser, onThemeToggle, onView }) {
+export function Sidebar({ activeView, theme, user, jwt, onLogout, onThemeToggle, onView }) {
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -77,14 +76,8 @@ export function Sidebar({ activeView, theme, user, jwt, onLogout, onSwitchUser, 
       </div>
 
       <label className="field compact">
-        <span>Cambiar rol</span>
-        <select value={user.id} onChange={(event) => onSwitchUser(event.target.value)}>
-          {users.map((item) => (
-            <option key={item.id} value={item.id}>
-              {item.name} - {item.role}
-            </option>
-          ))}
-        </select>
+        <span>Sesion API</span>
+        <input value={`${user.email} - ${user.role}`} readOnly />
       </label>
 
       <div className="token-box" id="seguridad">

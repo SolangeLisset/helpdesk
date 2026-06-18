@@ -23,10 +23,13 @@ export default [
         console: 'readonly',
         crypto: 'readonly',
         document: 'readonly',
+        fetch: 'readonly',
+        FormData: 'readonly',
         localStorage: 'readonly',
         process: 'readonly',
         React: 'readonly',
         URL: 'readonly',
+        URLSearchParams: 'readonly',
         window: 'readonly'
       }
     },

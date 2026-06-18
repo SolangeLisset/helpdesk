@@ -85,6 +85,11 @@ Cada ticket muestra SLA visual por prioridad y un historial de cambios para audi
 - Empty states para vistas sin datos.
 - Roles simulados: Administrador, Tecnico y Usuario.
 - JWT simulado para representar sesion activa.
+- Backend REST con Express para tickets, usuarios, comentarios y adjuntos.
+- PostgreSQL como base de datos relacional.
+- Login real con JWT firmado y expiracion.
+- Registro de usuarios y recuperacion de password por token.
+- Subida real de adjuntos con almacenamiento local.
 
 ## Acceso demo
 
@@ -108,6 +113,10 @@ Usuarios disponibles:
 - ESLint
 - Prettier
 - Node test runner
+- Express
+- PostgreSQL
+- JWT
+- Multer
 - CSS modular separado del HTML
 
 ## Instalacion
@@ -126,6 +135,26 @@ Luego abre la URL que muestra Vite, normalmente:
 
 ```text
 http://127.0.0.1:5173
+```
+
+## Ejecutar API REST
+
+Configura `.env` a partir de `.env.example`, crea la base PostgreSQL y aplica el esquema:
+
+```bash
+psql "postgres://postgres:postgres@localhost:5432/helpdesk" -f server/schema.sql
+```
+
+Luego ejecuta:
+
+```bash
+npm run api:dev
+```
+
+La API queda disponible en:
+
+```text
+http://127.0.0.1:4000/api
 ```
 
 ## Crear build de produccion
@@ -191,6 +220,10 @@ helpdesk-react/
   index.html
   netlify.toml
   package.json
+  server/
+    index.js
+    schema.sql
+    routes/
   src/
     components/
     hooks/

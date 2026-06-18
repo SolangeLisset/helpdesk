@@ -7,7 +7,7 @@ export default [
   },
   js.configs.recommended,
   {
-    files: ['src/**/*.{js,jsx}'],
+    files: ['src/**/*.{js,jsx}', 'server/**/*.js'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -24,6 +24,7 @@ export default [
         crypto: 'readonly',
         document: 'readonly',
         localStorage: 'readonly',
+        process: 'readonly',
         React: 'readonly',
         URL: 'readonly',
         window: 'readonly'

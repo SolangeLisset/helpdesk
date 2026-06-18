@@ -7,6 +7,10 @@ La aplicacion esta construida con React y Vite. El frontend usa datos demo local
 ## Estructura principal
 
 ```text
+server/
+  index.js       API Express.
+  schema.sql     Esquema PostgreSQL.
+  routes/        Endpoints REST.
 src/
   components/     Componentes reutilizables de interfaz.
   hooks/          Hooks de estado y persistencia.
@@ -56,6 +60,22 @@ La vista de reportes reutiliza los tickets filtrados por rol, busqueda y rango d
 ## Experiencia de usuario
 
 La aplicacion incluye modo oscuro persistido en `localStorage`, toasts de confirmacion, estados vacios reutilizables, animaciones suaves en Kanban y modal de detalle para inspeccionar tickets sin salir del tablero.
+
+## Backend REST
+
+La carpeta `server/` contiene una API REST con Express y PostgreSQL:
+
+- `POST /api/auth/register` registra usuarios con password hasheado mediante bcrypt.
+- `POST /api/auth/login` firma JWT con expiracion.
+- `POST /api/auth/forgot-password` genera token de recuperacion.
+- `POST /api/auth/reset-password` actualiza la password usando un token valido.
+- `GET /api/tickets` lista tickets segun rol y filtros.
+- `POST /api/tickets` crea tickets.
+- `PATCH /api/tickets/:id` actualiza estado, prioridad o tecnico.
+- `POST /api/tickets/:id/comments` agrega comentarios.
+- `POST /api/tickets/:ticketId/attachments` sube adjuntos con Multer.
+
+El esquema SQL esta en `server/schema.sql`. Para produccion, los adjuntos deberian moverse desde almacenamiento local hacia Supabase Storage, S3 o Cloudinary.
 
 ## Tests
 

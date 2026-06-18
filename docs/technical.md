@@ -53,6 +53,10 @@ La vista de reportes reutiliza los tickets filtrados por rol, busqueda y rango d
 - Exportacion CSV.
 - Vista imprimible para guardar como PDF desde el navegador.
 
+## Experiencia de usuario
+
+La aplicacion incluye modo oscuro persistido en `localStorage`, toasts de confirmacion, estados vacios reutilizables, animaciones suaves en Kanban y modal de detalle para inspeccionar tickets sin salir del tablero.
+
 ## Tests
 
 Los tests usan `node:test` y validan reglas de negocio:

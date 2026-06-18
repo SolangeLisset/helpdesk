@@ -1,6 +1,7 @@
 import { Filter, Search, SlidersHorizontal } from 'lucide-react';
 import { priorities, statuses } from '../constants.js';
 import { technicians } from '../mockData.js';
+import { EmptyState } from './common/EmptyState.jsx';
 import { Pill } from './common/Pill.jsx';
 import { SelectFilter } from './common/SelectFilter.jsx';
 import { SlaBadge } from './sla/SlaBadge.jsx';
@@ -80,6 +81,12 @@ export function TicketPanel({ tickets, selectedId, filters, onFilter, onSelect }
             </div>
           </button>
         ))}
+        {!tickets.length && (
+          <EmptyState
+            title="Sin tickets para mostrar"
+            message="Ajusta los filtros o crea un nuevo ticket para iniciar la atencion."
+          />
+        )}
       </div>
     </section>
   );

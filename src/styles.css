@@ -38,6 +38,90 @@ button {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
   min-height: 100vh;
+  background: #eef3f7;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.app-shell[data-theme='dark'] {
+  color: #e5eef8;
+  background: #0b1120;
+}
+
+.app-shell[data-theme='dark'] .workspace {
+  background: #0b1120;
+}
+
+.app-shell[data-theme='dark'] .panel,
+.app-shell[data-theme='dark'] .metric,
+.app-shell[data-theme='dark'] .kanban-column,
+.app-shell[data-theme='dark'] .reports-toolbar,
+.app-shell[data-theme='dark'] .report-card,
+.app-shell[data-theme='dark'] .report-summary article,
+.app-shell[data-theme='dark'] .modal {
+  color: #e5eef8;
+  background: #111827;
+  border-color: #263449;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+}
+
+.app-shell[data-theme='dark'] .ticket-row,
+.app-shell[data-theme='dark'] .kanban-card,
+.app-shell[data-theme='dark'] .comment,
+.app-shell[data-theme='dark'] .history-item,
+.app-shell[data-theme='dark'] .search-field,
+.app-shell[data-theme='dark'] .select-filter,
+.app-shell[data-theme='dark'] .field input,
+.app-shell[data-theme='dark'] .field select,
+.app-shell[data-theme='dark'] .field textarea,
+.app-shell[data-theme='dark'] .comment-form input,
+.app-shell[data-theme='dark'] .dropzone {
+  color: #e5eef8;
+  background: #17212f;
+  border-color: #34445b;
+}
+
+.app-shell[data-theme='dark'] .ticket-row.selected,
+.app-shell[data-theme='dark'] .kanban-column.drag-over {
+  background: #123b3b;
+  border-color: #2dd4bf;
+}
+
+.app-shell[data-theme='dark'] .kanban-open,
+.app-shell[data-theme='dark'] .search-field input,
+.app-shell[data-theme='dark'] .select-filter select,
+.app-shell[data-theme='dark'] .field input,
+.app-shell[data-theme='dark'] .field select,
+.app-shell[data-theme='dark'] .field textarea,
+.app-shell[data-theme='dark'] .comment-form input {
+  color: #f8fafc;
+}
+
+.app-shell[data-theme='dark'] .description,
+.app-shell[data-theme='dark'] .comment p,
+.app-shell[data-theme='dark'] .bar-label {
+  color: #c8d3df;
+}
+
+.app-shell[data-theme='dark'] .brand span,
+.app-shell[data-theme='dark'] .session-card span,
+.app-shell[data-theme='dark'] .metric span,
+.app-shell[data-theme='dark'] .metric small,
+.app-shell[data-theme='dark'] .ticket-row span,
+.app-shell[data-theme='dark'] .row-meta small,
+.app-shell[data-theme='dark'] .comment span,
+.app-shell[data-theme='dark'] .field span,
+.app-shell[data-theme='dark'] .eyebrow,
+.app-shell[data-theme='dark'] .empty-state p,
+.app-shell[data-theme='dark'] .history-item span,
+.app-shell[data-theme='dark'] .history-item p {
+  color: #9fb0c4;
+}
+
+.app-shell[data-theme='dark'] .icon-button {
+  background: #263449;
+  color: #f8fafc;
 }
 
 .login-shell {
@@ -371,6 +455,7 @@ h3 {
 .kanban-column.drag-over {
   border-color: #0f766e;
   background: #f0fdfa;
+  transform: translateY(-2px);
 }
 
 .kanban-column header,
@@ -414,6 +499,20 @@ h3 {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+
+.kanban-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+}
+
+.kanban-card.moved {
+  animation: ticket-moved 760ms ease;
 }
 
 .kanban-card[draggable='true'] {
@@ -472,12 +571,37 @@ h3 {
   padding: 0 8px;
 }
 
-.empty-column {
+.empty-column,
+.empty-state {
   margin: 0;
   padding: 14px;
   border: 1px dashed #cbd5e1;
   border-radius: 8px;
   text-align: center;
+}
+
+.empty-state {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  background: #f8fafc;
+}
+
+.empty-state-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-weight: 900;
+}
+
+.empty-state p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.45;
 }
 
 .panel {
@@ -917,6 +1041,16 @@ h3 {
   box-shadow: 0 22px 70px rgba(15, 23, 42, 0.28);
 }
 
+.ticket-detail-modal {
+  width: min(920px, 100%);
+}
+
+.ticket-detail-modal .panel {
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}
+
 .dropzone {
   min-height: 72px;
   justify-content: center;
@@ -935,6 +1069,81 @@ h3 {
 
 .full {
   width: 100%;
+}
+
+.toast-stack {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 40;
+  display: grid;
+  gap: 10px;
+  width: min(360px, calc(100vw - 36px));
+}
+
+.toast {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #dbe4ed;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16);
+  animation: toast-in 220ms ease;
+}
+
+.toast.success svg {
+  color: #0f766e;
+}
+
+.toast.info svg {
+  color: #0369a1;
+}
+
+.toast button {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  color: #475569;
+  background: #eef3f7;
+}
+
+.app-shell[data-theme='dark'] .toast {
+  color: #e5eef8;
+  background: #111827;
+  border-color: #34445b;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ticket-moved {
+  0% {
+    transform: scale(0.98);
+    border-color: #2dd4bf;
+    box-shadow: 0 0 0 0 rgba(45, 212, 191, 0.42);
+  }
+  55% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 8px rgba(45, 212, 191, 0.12);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: none;
+  }
 }
 
 @media (max-width: 1120px) {
@@ -960,10 +1169,11 @@ h3 {
   .sidebar {
     position: static;
     height: auto;
+    padding: 18px;
   }
 
   .workspace {
-    padding: 18px;
+    padding: 14px;
   }
 
   .topbar,
@@ -1005,5 +1215,34 @@ h3 {
 
   .row-meta {
     justify-items: start;
+  }
+
+  .dashboard {
+    gap: 10px;
+  }
+
+  .metric,
+  .panel,
+  .report-card,
+  .reports-toolbar,
+  .report-summary article {
+    padding: 14px;
+  }
+
+  .modal-backdrop {
+    align-items: end;
+    padding: 10px;
+  }
+
+  .modal {
+    width: 100%;
+    max-height: calc(100vh - 20px);
+    border-radius: 8px 8px 0 0;
+  }
+
+  .toast-stack {
+    right: 10px;
+    bottom: 10px;
+    width: calc(100vw - 20px);
   }
 }

@@ -1,10 +1,20 @@
 import { Download, FileText } from 'lucide-react';
+import { EmptyState } from '../components/common/EmptyState.jsx';
 import { BarChart } from '../components/reports/BarChart.jsx';
 import { exportTicketsCsv, exportTicketsPdf } from '../utils/exportReports.js';
 import { getReportMetrics } from '../utils/tickets.js';
 
 export function ReportsPage({ tickets }) {
   const metrics = getReportMetrics(tickets);
+
+  if (!tickets.length) {
+    return (
+      <EmptyState
+        title="No hay datos para reportar"
+        message="Cambia los filtros de fecha o crea tickets para generar graficos y exportaciones."
+      />
+    );
+  }
 
   return (
     <section className="reports-layout">

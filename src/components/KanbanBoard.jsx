@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { statuses } from '../constants.js';
+import { EmptyState } from './common/EmptyState.jsx';
 import { Pill } from './common/Pill.jsx';
 import { SlaBadge } from './sla/SlaBadge.jsx';
 
-export function KanbanBoard({ canManage, tickets, onOpen, onMove }) {
+export function KanbanBoard({ canManage, movedTicketId, tickets, onOpen, onMove }) {
   const [dragOverStatus, setDragOverStatus] = useState('');
   const groupedTickets = statuses.map((status) => ({
     status,
@@ -40,7 +41,7 @@ export function KanbanBoard({ canManage, tickets, onOpen, onMove }) {
           <div className="kanban-list">
             {column.tickets.map((ticket) => (
               <div
-                className="kanban-card"
+                className={`kanban-card ${ticket.id === movedTicketId ? 'moved' : ''}`}
                 draggable={canManage}
                 key={ticket.id}
                 onDragStart={(event) => event.dataTransfer.setData('text/plain', ticket.id)}
@@ -68,7 +69,12 @@ export function KanbanBoard({ canManage, tickets, onOpen, onMove }) {
                 )}
               </div>
             ))}
-            {!column.tickets.length && <p className="empty-column">Sin tickets</p>}
+            {!column.tickets.length && (
+              <EmptyState
+                title="Columna libre"
+                message="No hay tickets en este estado. Arrastra uno aqui cuando cambie el flujo."
+              />
+            )}
           </div>
         </article>
       ))}

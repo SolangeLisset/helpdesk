@@ -78,6 +78,11 @@ Cada ticket muestra SLA visual por prioridad y un historial de cambios para audi
 - Tickets vencidos por tecnico.
 - Exportacion de reportes a CSV y vista imprimible PDF.
 - Filtros por rango de fecha.
+- Modo oscuro.
+- Toasts de confirmacion.
+- Animaciones al mover tickets en Kanban.
+- Modal de detalle desde Kanban.
+- Empty states para vistas sin datos.
 - Roles simulados: Administrador, Tecnico y Usuario.
 - JWT simulado para representar sesion activa.
 

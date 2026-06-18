@@ -21,6 +21,7 @@ export default [
         Blob: 'readonly',
         btoa: 'readonly',
         console: 'readonly',
+        crypto: 'readonly',
         document: 'readonly',
         localStorage: 'readonly',
         React: 'readonly',

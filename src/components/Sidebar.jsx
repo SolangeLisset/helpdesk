@@ -6,12 +6,13 @@ import {
   LogOut,
   PieChart,
   ShieldCheck,
+  SunMoon,
   Ticket,
   Users
 } from 'lucide-react';
 import { users } from '../mockData.js';
 
-export function Sidebar({ activeView, user, jwt, onLogout, onSwitchUser, onView }) {
+export function Sidebar({ activeView, theme, user, jwt, onLogout, onSwitchUser, onThemeToggle, onView }) {
   return (
     <aside className="sidebar">
       <div className="brand">
@@ -93,6 +94,11 @@ export function Sidebar({ activeView, user, jwt, onLogout, onSwitchUser, onView 
         </div>
         <code>{jwt}</code>
       </div>
+
+      <button className="ghost-button" type="button" onClick={onThemeToggle}>
+        <SunMoon size={16} />
+        {theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
+      </button>
 
       <button className="ghost-button" type="button" onClick={onLogout}>
         <LogOut size={16} />

@@ -157,6 +157,15 @@ La API queda disponible en:
 http://127.0.0.1:4000/api
 ```
 
+En Render, el servicio puede usar:
+
+```text
+Build command: npm install
+Start command: npm start
+```
+
+El script `npm start` inicia `server/index.js`.
+
 ## Conexion frontend-backend
 
 El frontend consume la API configurada en `VITE_API_URL`. Por defecto `.env.example` apunta al backend en Render:

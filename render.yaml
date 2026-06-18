@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: helpdesk-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_EXPIRES_IN
+        value: 2h
+      - key: UPLOAD_DIR
+        value: server/uploads
+      - key: CLIENT_URL
+        value: https://mesa-de-ayuda.netlify.app,http://127.0.0.1:5173
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false

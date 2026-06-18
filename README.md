@@ -95,6 +95,9 @@ Usuarios disponibles:
 - React
 - Vite
 - Lucide React
+- ESLint
+- Prettier
+- Node test runner
 - CSS modular separado del HTML
 
 ## Instalacion
@@ -120,6 +123,36 @@ http://127.0.0.1:5173
 ```bash
 npm run build
 ```
+
+## Calidad y tests
+
+```bash
+npm test
+npm run lint
+npm run format:check
+```
+
+Para aplicar formato automaticamente:
+
+```bash
+npm run format
+```
+
+## Variables de entorno
+
+El proyecto incluye `.env.example` como referencia:
+
+```text
+VITE_APP_NAME="Mesa de Ayuda"
+VITE_DEMO_URL="https://mesa-de-ayuda.netlify.app/"
+VITE_SUPPORT_EMAIL="soporte@empresa.cl"
+```
+
+## Documentacion tecnica
+
+La documentacion de arquitectura, flujo de datos, SLA, auditoria y tests esta en:
+
+[docs/technical.md](docs/technical.md)
 
 ## Deploy en Netlify
 
@@ -149,11 +182,15 @@ helpdesk-react/
   netlify.toml
   package.json
   src/
+    components/
+    hooks/
     main.jsx
     mockData.js
+    pages/
     styles.css
     utils/
       auth.js
+      tickets.js
 ```
 
 ## Nota

@@ -1,6 +1,13 @@
 :root {
   color-scheme: light;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
   color: #15202b;
   background: #eef3f7;
   letter-spacing: 0;
@@ -40,7 +47,8 @@ button {
   padding: 24px;
   background:
     linear-gradient(rgba(238, 243, 247, 0.82), rgba(238, 243, 247, 0.92)),
-    url("https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1600&q=80") center / cover;
+    url('https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1600&q=80') center /
+      cover;
 }
 
 .login-card {
@@ -408,11 +416,11 @@ h3 {
   border-radius: 8px;
 }
 
-.kanban-card[draggable="true"] {
+.kanban-card[draggable='true'] {
   cursor: grab;
 }
 
-.kanban-card[draggable="true"]:active {
+.kanban-card[draggable='true']:active {
   cursor: grabbing;
 }
 

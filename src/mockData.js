@@ -14,7 +14,8 @@ export const seedTickets = [
   {
     id: 'HD-0100',
     title: 'VPN corporativa no conecta',
-    description: 'El usuario no puede acceder a la VPN desde fuera de la oficina. El error aparece despues de validar MFA.',
+    description:
+      'El usuario no puede acceder a la VPN desde fuera de la oficina. El error aparece despues de validar MFA.',
     category: 'Red',
     priority: 'Alta',
     status: 'En progreso',
@@ -44,7 +45,8 @@ export const seedTickets = [
   {
     id: 'HD-0099',
     title: 'Notebook con disco casi lleno',
-    description: 'Equipo del area comercial presenta lentitud y alertas de almacenamiento disponible menor al 5%.',
+    description:
+      'Equipo del area comercial presenta lentitud y alertas de almacenamiento disponible menor al 5%.',
     category: 'Hardware',
     priority: 'Media',
     status: 'Pendiente',
@@ -86,7 +88,8 @@ export const seedTickets = [
   {
     id: 'HD-0097',
     title: 'Alerta EDR en equipo financiero',
-    description: 'Consola de seguridad reporta comportamiento anomalo en estacion de trabajo del area financiera.',
+    description:
+      'Consola de seguridad reporta comportamiento anomalo en estacion de trabajo del area financiera.',
     category: 'Seguridad',
     priority: 'Alta',
     status: 'Abierto',
